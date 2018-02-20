@@ -1,0 +1,45 @@
+﻿using System;
+using System.IO;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using ImageSink.PictureServiceReference;
+
+namespace ImageSink
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow 
+    {
+        private readonly DispatcherTimer _timer;
+        private readonly PictureServiceClient _client;
+
+        public MainWindow()
+        {
+            _client = new PictureServiceClient();
+
+            _timer = new DispatcherTimer
+            {
+                Interval = new TimeSpan(0, 0, 0, 1)
+            };
+            _timer.Tick += TimerTick;
+            _timer.Start();
+        }
+
+        private void TimerTick(object sender, EventArgs e)
+        {
+            //load the latest image from the server
+            var result = _client.DownloadImage("key");
+            if (result == null)
+            {
+                return;
+            }
+            var bitmapimage = new BitmapImage();
+            var stream = new MemoryStream(result);
+            bitmapimage.BeginInit();
+            bitmapimage.StreamSource = stream;
+            bitmapimage.EndInit();
+            TvImage.Source = bitmapimage;           
+        }
+    }
+}
