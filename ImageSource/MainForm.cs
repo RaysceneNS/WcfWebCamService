@@ -6,127 +6,127 @@ using ImageSource.PictureServiceReference;
 
 namespace ImageSource
 {
-	public partial class MainForm : Form
-	{
-		private WebCamera[] _cameras;
-		private WebCamera _selectedCamera;
-		private readonly Timer _timer = new Timer();
-		private PictureServiceClient _pictureServiceClient;
-		private readonly int[] _intervals = { 1, 2, 3, 5, 10 };
+    public partial class MainForm : Form
+    {
+        private WebCamera[] _cameras;
+        private WebCamera _selectedCamera;
+        private readonly Timer _timer = new Timer();
+        private PictureServiceClient _pictureServiceClient;
+        private readonly int[] _intervals = { 1, 2, 3, 5, 10 };
 
-		public MainForm()
-		{
-			InitializeComponent();
+        public MainForm()
+        {
+            InitializeComponent();
 
-			_timer.Tick += UploadTimerTick;
-		}
+            _timer.Tick += UploadTimerTick;
+        }
 
-		protected override void OnLoad(EventArgs e)
-		{
-			base.OnLoad(e);
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
 
-			_pictureServiceClient = new PictureServiceClient("CustomBinding_IPictureService");
-			_pictureServiceClient.UploadImageCompleted += Client_UploadImageCompleted;
-			_cameras = WebCamera.Devices();
+            _pictureServiceClient = new PictureServiceClient("CustomBinding_IPictureService");
+            _pictureServiceClient.UploadImageCompleted += Client_UploadImageCompleted;
+            _cameras = WebCamera.Devices();
 
-			LoadIntervals();
-			LoadCameraList();
-		}
+            LoadIntervals();
+            LoadCameraList();
+        }
         
-		private void LoadIntervals()
-		{
-			comboBoxUploadFrequency.Items.Clear();
-			comboBoxUploadFrequency.Items.Add("Off");
-			foreach (var interval in _intervals)
-			{
-				comboBoxUploadFrequency.Items.Add($"{interval} second(s)");
-			}
-			comboBoxUploadFrequency.SelectedIndex = 1;
-		}
+        private void LoadIntervals()
+        {
+            comboBoxUploadFrequency.Items.Clear();
+            comboBoxUploadFrequency.Items.Add("Off");
+            foreach (var interval in _intervals)
+            {
+                comboBoxUploadFrequency.Items.Add($"{interval} second(s)");
+            }
+            comboBoxUploadFrequency.SelectedIndex = 1;
+        }
 
-	    private void UploadTimerTick(object sender, EventArgs e)
-		{
-			// get the latest image from the select camera, if any...
-		    var img = _selectedCamera?.GetImage();
-			if (img == null) 
-				return;
+        private void UploadTimerTick(object sender, EventArgs e)
+        {
+            // get the latest image from the select camera, if any...
+            var img = _selectedCamera?.GetImage();
+            if (img == null) 
+                return;
 
-			_timer.Stop();
+            _timer.Stop();
             
-		    var stream = new MemoryStream();			
-			img.Save(stream, ImageFormat.Jpeg);
+            var stream = new MemoryStream();			
+            img.Save(stream, ImageFormat.Jpeg);
 
-			try
-			{
-				_pictureServiceClient.UploadImageAsync("key", stream.ToArray());
-			}
-			catch (Exception err)
-			{
-				labelMessage.Text = err.Message;
-			}
-		}
+            try
+            {
+                _pictureServiceClient.UploadImageAsync("key", stream.ToArray());
+            }
+            catch (Exception err)
+            {
+                labelMessage.Text = err.Message;
+            }
+        }
 
-	    private void Client_UploadImageCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
-		{
-			//inform
-			labelMessage.Text = e.Error?.Message ?? $"Uploaded @ {DateTime.Now}";
-			//begin timing for the next snapshot
-			_timer.Start();
-		}
-		
-		private void LoadCameraList()
-		{
-			comboBoxCamera.Items.Clear();
-			bool enable;
-			
-			if (_cameras.Length == 0)
-			{
-				pictureBoxImage.Image = Properties.Resources.NoImageAvailable;
-				comboBoxCamera.SelectedIndex = -1;
-				enable = false;
-			}
-			else
-			{
-				foreach (var cam in _cameras)
-				{
-					comboBoxCamera.Items.Add(cam);
-				}
-				comboBoxCamera.SelectedIndex = 0;
-				comboBoxCamera.DropDownStyle = ComboBoxStyle.DropDownList;
-				enable = true;
-			}
+        private void Client_UploadImageCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        {
+            //inform
+            labelMessage.Text = e.Error?.Message ?? $"Uploaded @ {DateTime.Now}";
+            //begin timing for the next snapshot
+            _timer.Start();
+        }
+        
+        private void LoadCameraList()
+        {
+            comboBoxCamera.Items.Clear();
+            bool enable;
+            
+            if (_cameras.Length == 0)
+            {
+                pictureBoxImage.Image = Properties.Resources.NoImageAvailable;
+                comboBoxCamera.SelectedIndex = -1;
+                enable = false;
+            }
+            else
+            {
+                foreach (var cam in _cameras)
+                {
+                    comboBoxCamera.Items.Add(cam);
+                }
+                comboBoxCamera.SelectedIndex = 0;
+                comboBoxCamera.DropDownStyle = ComboBoxStyle.DropDownList;
+                enable = true;
+            }
 
-			buttonVideoSettings.Enabled = enable;
-			comboBoxCamera.Enabled = enable;
-			comboBoxUploadFrequency.Enabled = enable;
-		}
+            buttonVideoSettings.Enabled = enable;
+            comboBoxCamera.Enabled = enable;
+            comboBoxUploadFrequency.Enabled = enable;
+        }
 
-		private void ComboBoxCamera_SelectedIndexChanged(object sender, EventArgs e)
-		{
-		    _selectedCamera?.StopWebCam();
+        private void ComboBoxCamera_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _selectedCamera?.StopWebCam();
 
-		    // fire up the selected cam
-			if (comboBoxCamera.SelectedIndex < 0 || comboBoxCamera.SelectedIndex >= _cameras.Length)
-				return;
+            // fire up the selected cam
+            if (comboBoxCamera.SelectedIndex < 0 || comboBoxCamera.SelectedIndex >= _cameras.Length)
+                return;
 
-			_selectedCamera = _cameras[comboBoxCamera.SelectedIndex];
-			_selectedCamera.DisplayWebCam(pictureBoxImage);
-		}
+            _selectedCamera = _cameras[comboBoxCamera.SelectedIndex];
+            _selectedCamera.DisplayWebCam(pictureBoxImage);
+        }
 
-		private void ComboBoxSnapshotInterval_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			if (comboBoxUploadFrequency.SelectedIndex <= 0)
-				_timer.Stop();
-			else
-			{
-				_timer.Interval = _intervals[comboBoxUploadFrequency.SelectedIndex-1]*1000;
-				_timer.Start();
-			}
-		}
+        private void ComboBoxSnapshotInterval_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBoxUploadFrequency.SelectedIndex <= 0)
+                _timer.Stop();
+            else
+            {
+                _timer.Interval = _intervals[comboBoxUploadFrequency.SelectedIndex-1]*1000;
+                _timer.Start();
+            }
+        }
 
-		private void Button1_Click(object sender, EventArgs e)
-		{
-		    _selectedCamera?.ShowFormatDialog();
-		}
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            _selectedCamera?.ShowFormatDialog();
+        }
     }
 }

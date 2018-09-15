@@ -46,12 +46,12 @@ namespace ImageSink
 
         private void DisplayImage(byte[] result)
         {
-            var bitmapimage = new BitmapImage();
+            var bitmapImage = new BitmapImage();
             var stream = new MemoryStream(result);
-            bitmapimage.BeginInit();
-            bitmapimage.StreamSource = stream;
-            bitmapimage.EndInit();
-            TvImage.Source = bitmapimage;
+            bitmapImage.BeginInit();
+            bitmapImage.StreamSource = stream;
+            bitmapImage.EndInit();
+            TvImage.Source = bitmapImage;
         }
     }
 }
