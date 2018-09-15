@@ -107,7 +107,7 @@ namespace ImageSource
 			public const int WS_VISIBLE = 0x10000000;
 
 			[DllImport("avicap32.dll", EntryPoint = "capGetDriverDescriptionA")]
-			public static extern bool CapGetDriverDescriptionA(int wDriverIndex, [MarshalAs(UnmanagedType.VBByRefStr)]ref String ldevicename, int namelength, [MarshalAs(UnmanagedType.VBByRefStr)] ref String deviceversion, int versionlength);
+			public static extern bool CapGetDriverDescriptionA(int wDriverIndex, [MarshalAs(UnmanagedType.VBByRefStr)]ref string ldevicename, int namelength, [MarshalAs(UnmanagedType.VBByRefStr)] ref string deviceversion, int versionlength);
 			
 			[DllImport("avicap32.dll", EntryPoint = "capCreateCaptureWindowA")]
 			public static extern int CapCreateCaptureWindowA([MarshalAs(UnmanagedType.VBByRefStr)] ref string windowname,

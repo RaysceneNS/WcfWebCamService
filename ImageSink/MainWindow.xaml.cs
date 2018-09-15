@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.ServiceModel;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using ImageSink.PictureServiceReference;
@@ -29,17 +30,28 @@ namespace ImageSink
         private void TimerTick(object sender, EventArgs e)
         {
             //load the latest image from the server
-            var result = _client.DownloadImage("key");
-            if (result == null)
+            try
             {
-                return;
+                var result = _client.DownloadImage("key");
+                if (result != null)
+                {
+                    DisplayImage(result);
+                }
             }
+            catch (EndpointNotFoundException)
+            {
+                //eat non response exception
+            }
+        }
+
+        private void DisplayImage(byte[] result)
+        {
             var bitmapimage = new BitmapImage();
             var stream = new MemoryStream(result);
             bitmapimage.BeginInit();
             bitmapimage.StreamSource = stream;
             bitmapimage.EndInit();
-            TvImage.Source = bitmapimage;           
+            TvImage.Source = bitmapimage;
         }
     }
 }

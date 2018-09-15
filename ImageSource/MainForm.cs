@@ -66,23 +66,6 @@ namespace ImageSource
 			}
 		}
 
-		/// <summary> 
-		/// Returns the image codec with the given mime type 
-		/// </summary> 
-		private static ImageCodecInfo GetEncoderInfo(string mimeType)
-		{
-			// Get image codecs for all image formats 
-			var codecs = ImageCodecInfo.GetImageEncoders();
-
-			// Find the correct image codec 
-			for (int i = 0; i < codecs.Length; i++)
-			{
-			    if (codecs[i].MimeType == mimeType)
-					return codecs[i];
-			}
-			return null;
-		}
-
 	    private void Client_UploadImageCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
 		{
 			//inform
